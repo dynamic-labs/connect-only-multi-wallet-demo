@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getEthersSigner } from "@dynamic-labs/ethers-v5";
+import { EthersWalletConnectExtension } from "@dynamic-labs/ethers-v5";
 import {
   DynamicContextProvider,
   useDynamicContext,
@@ -21,7 +21,7 @@ function Page() {
       return;
     }
 
-    const signer = await getEthersSigner(primaryWallet.connector);
+    const signer = await primaryWallet.connector.getEthersSigner();
     const signature = await signer.signMessage("hello world");
     setSignature(signature)
   }
@@ -69,6 +69,12 @@ export default function WrappedPage() {
       settings={{
         environmentId: "373a7e50-1a9f-46dc-afd3-3777221bddb3",
         initialAuthenticationMode: "connect-only",
+        eventsCallbacks: {
+          onConnectSuccess: (wallet) => {
+            console.log("onConnectSuccess", wallet);
+          },
+        },
+        walletConnectorExtensions: [EthersWalletConnectExtension]
       }}
     >
       <Page />
