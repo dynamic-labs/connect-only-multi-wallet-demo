@@ -3,7 +3,9 @@ import { EthersWalletConnectExtension } from "@dynamic-labs/ethers-v5";
 import {
   DynamicContextProvider,
   useDynamicContext,
-} from "@dynamic-labs/sdk-react";
+} from "@dynamic-labs/sdk-react-core";
+import { EthereumWalletConnectors } from "@dynamic-labs/ethereum-all";
+import { StarknetWalletConnectors } from "@dynamic-labs/starknet-all";
 
 function Page() {
   const {
@@ -14,16 +16,19 @@ function Page() {
     handleUnlinkWallet,
   } = useDynamicContext();
 
-  const [signature, setSignature] = useState('')
+  const [signature, setSignature] = useState("");
 
   async function signMessage() {
     if (!primaryWallet) {
       return;
     }
 
-    const signer = await primaryWallet.connector.getEthersSigner();
-    const signature = await signer.signMessage("hello world");
-    setSignature(signature)
+    const signer = await (primaryWallet.connector as any).getEthersSigner();
+    const signature = await signer?.signMessage("hello world");
+    if (!signature) {
+      return;
+    }
+    setSignature(signature);
   }
 
   return (
@@ -74,7 +79,8 @@ export default function WrappedPage() {
             console.log("onConnectSuccess", wallet);
           },
         },
-        walletConnectorExtensions: [EthersWalletConnectExtension]
+        walletConnectorExtensions: [EthersWalletConnectExtension],
+        walletConnectors: [EthereumWalletConnectors, StarknetWalletConnectors],
       }}
     >
       <Page />
